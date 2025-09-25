@@ -1,31 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Building2, Users, Calendar, Target, TrendingUp, Phone, Mail } from 'lucide-react'
+import { Building2, Users, Target, TrendingUp, Phone, Mail, CheckCircle, Calendar } from 'lucide-react'
+import ContactInfoCard from './ContactInfoCard'
+import type { Contact } from '../types'
 
 interface Property {
   id: string
   fields: {
     Address: string
-    'Asking Price': number
-    'ARV Estimate': number
-    'Repair Estimate': number
-    'Property Type': string
-    'Deal Stage': string
+    'Asking Price'?: number
+    'ARV Estimate'?: number
+    'Repair Estimate'?: number
+    'Property Type'?: string
+    'Deal Stage'?: string
+    'Days on Market'?: number
     Notes?: string
-  }
-}
-
-interface Contact {
-  id: string
-  fields: {
-    Name: string
-    Email?: string
-    'Phone Number'?: string
-    'Contact Type': string
-    Temperature: string
-    'Last Contact Date'?: string
-    'Next Follow-up Date'?: string
   }
 }
 
@@ -45,7 +35,8 @@ export default function Dashboard() {
   const [properties, setProperties] = useState<Property[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [activities, setActivities] = useState<Activity[]>([])
-  const [loading, setLoading] = useState(true)
+  const [, setLoading] = useState(true)
+  const [selectedContact, setSelectedContact] = useState<{contact: Contact | null, type: 'email' | 'phone' | null}>({ contact: null, type: null })
 
   // Fetch data from Airtable API
   useEffect(() => {
@@ -61,6 +52,7 @@ export default function Dashboard() {
         fetch('/api/activities')
       ])
 
+
       const propertiesData = await propertiesRes.json()
       const contactsData = await contactsRes.json()
       const activitiesData = await activitiesRes.json()
@@ -74,6 +66,28 @@ export default function Dashboard() {
       setLoading(false)
     }
   }
+
+  const completeActivity = async (activityId: string) => {
+    try {
+      const response = await fetch('/api/activities/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activityId })
+      });
+  
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to complete activity');
+      }
+  
+      // Refresh the activities after completion
+      await fetchData();
+    } catch (error) {
+      console.error('Error completing activity:', error);
+      // You might want to add error handling here, like showing a toast notification
+      alert(error instanceof Error ? error.message : 'Failed to complete activity');
+    }
+  };
 
   // Calculate statistics
   const totalProperties = properties.length
@@ -94,27 +108,85 @@ export default function Dashboard() {
 
   const hotContacts = contacts.filter(c => c.fields.Temperature === 'Hot').length
   
+  // Calculate overdue activities
   const overdueActivities = activities.filter(a => {
-    if (!a.fields.Date) return false
+    if (!a.fields.Date || a.fields.Status === 'Completed') return false
     const activityDate = new Date(a.fields.Date)
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     return activityDate < today
   }).length
 
-  if (loading) {
+  // Stat Card Component
+  const StatCard = ({ title, value, icon, color }: { title: string; value: string; icon: React.ReactNode; color: string }) => {
+    const colorClasses = {
+      blue: 'bg-blue-500 text-white',
+      green: 'bg-green-500 text-white',
+      purple: 'bg-purple-500 text-white',
+      orange: 'bg-orange-500 text-white',
+      red: 'bg-red-500 text-white',
+      yellow: 'bg-yellow-500 text-white',
+    } as const;
+
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center">
+          <div className={`flex-shrink-0 p-3 rounded-lg ${colorClasses[color as keyof typeof colorClasses]}`}>
+            {icon}
+          </div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-500">{title}</p>
+            <p className="text-2xl font-semibold text-gray-900">{value}</p>
+          </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
+
+  // Helper function for deal stage colors
+  const getDealStageColor = (stage: string) => {
+    switch (stage) {
+      case 'Lead':
+        return 'bg-blue-100 text-blue-800';
+      case 'Prospect':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Under Contract':
+        return 'bg-purple-100 text-purple-800';
+      case 'Closed':
+        return 'bg-green-100 text-green-800';
+      case 'Dead':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // Calculate stats
+  const stats = {
+    totalProperties: properties.length,
+    totalContacts: contacts.length,
+    totalDealValue: properties.reduce((sum, p) => sum + (p.fields['Asking Price'] || 0), 0),
+    avgDaysOnMarket: properties.length > 0 
+      ? Math.round(properties.reduce((sum, p) => sum + (p.fields['Days on Market'] || 0), 0) / properties.length)
+      : 0,
+    hotLeads: contacts.filter(c => c.fields.Temperature === 'Hot').length,
+    overdueActivities: activities.filter(a => {
+      if (!a.fields.Date || a.fields.Status === 'Completed') return false;
+      const activityDate = new Date(a.fields.Date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return activityDate < today;
+    }).length
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Contact Info Card Modal */}
+      <ContactInfoCard 
+        contact={selectedContact.contact} 
+        type={selectedContact.type}
+        onClose={() => setSelectedContact({ contact: null, type: null })}
+      />
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -194,8 +266,8 @@ export default function Dashboard() {
                         ${property.fields['Asking Price']?.toLocaleString() || 0}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getDealStageColor(property.fields['Deal Stage'])}`}>
-                          {property.fields['Deal Stage']}
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getDealStageColor(property.fields['Deal Stage'] || '')}`}>
+                          {property.fields['Deal Stage'] || 'Not Set'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -229,12 +301,18 @@ export default function Dashboard() {
                       </div>
                       <div className="flex space-x-2">
                         {contact.fields.Email && (
-                          <button className="p-2 text-gray-400 hover:text-blue-600">
+                          <button 
+                            onClick={() => setSelectedContact({ contact, type: 'email' })}
+                            className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                          >
                             <Mail className="h-4 w-4" />
                           </button>
                         )}
                         {contact.fields['Phone Number'] && (
-                          <button className="p-2 text-gray-400 hover:text-green-600">
+                          <button 
+                            onClick={() => setSelectedContact({ contact, type: 'phone' })}
+                            className="p-2 text-gray-400 hover:text-green-600 transition-colors"
+                          >
                             <Phone className="h-4 w-4" />
                           </button>
                         )}
@@ -253,27 +331,47 @@ export default function Dashboard() {
               <div className="p-6">
                 <div className="space-y-4">
                   {activities.filter(a => {
-                    if (!a.fields.Date) return false
-                    const activityDate = new Date(a.fields.Date)
-                    const today = new Date()
-                    today.setHours(0, 0, 0, 0)
-                    return activityDate < today
+                    if (!a.fields.Date || a.fields.Status === 'Completed') return false;
+                    const activityDate = new Date(a.fields.Date);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    return activityDate < today;
                   }).slice(0, 5).map((activity) => (
-                    <div key={activity.id} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                      <div>
+                    <div key={activity.id} className="group flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors">
+                      <div className="flex-1">
                         <h4 className="font-medium text-gray-900">{activity.fields['Next Action']}</h4>
                         <p className="text-sm text-gray-600">
                           {activity.fields['Name (from Contact)']?.[0]} • {activity.fields['Address (from Property)']?.[0]}
                         </p>
+                        <div className="flex items-center mt-1">
+                          <span className="text-sm text-red-600 font-medium">{activity.fields['Activity Type']}</span>
+                          <span className="mx-2 text-gray-300">•</span>
+                          <p className="text-xs text-gray-500">
+                            Due: {activity.fields.Date && new Date(activity.fields.Date).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-sm text-red-600 font-medium">{activity.fields['Activity Type']}</span>
-                        <p className="text-xs text-gray-500">
-                          {activity.fields.Date && new Date(activity.fields.Date).toLocaleDateString()}
-                        </p>
-                      </div>
+                      <button
+                        onClick={() => completeActivity(activity.id)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 flex items-center"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Complete
+                      </button>
                     </div>
                   ))}
+                  {activities.filter(a => {
+                    if (!a.fields.Date || a.fields.Status === 'Completed') return false;
+                    const activityDate = new Date(a.fields.Date);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    return activityDate < today;
+                  }).length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p>No overdue activities!</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

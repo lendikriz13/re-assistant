@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Real Estate CRM
+
+A modern real estate CRM built with Next.js, TypeScript, and Tailwind CSS.
+
+## Features
+
+- Property management
+- Contact management
+- Activity tracking
+- Dashboard with key metrics
+- Responsive design
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18.0.0 or later
+- npm or yarn
+- Airtable account with API access
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory and add the following variables:
+
+```
+NEXT_PUBLIC_AIRTABLE_BASE_ID=your_airtable_base_id
+AIRTABLE_PERSONAL_ACCESS_TOKEN=your_airtable_pat
+```
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Run the development server:
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Vercel
 
-## Learn More
+1. Push your code to a GitHub/GitLab/Bitbucket repository
+2. Import the repository on [Vercel](https://vercel.com/new)
+3. Add the following environment variables in your Vercel project settings:
+   - `NEXT_PUBLIC_AIRTABLE_BASE_ID`: Your Airtable Base ID
+   - `AIRTABLE_PERSONAL_ACCESS_TOKEN`: Your Airtable Personal Access Token
+4. Deploy!
 
-To learn more about Next.js, take a look at the following resources:
+### Required Airtable Tables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Make sure your Airtable base has the following tables with the correct fields:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Properties**: Address, Asking Price, ARV Estimate, Repair Estimate, Property Type, Deal Stage, Days on Market, Notes
+- **Contacts**: Name, Email, Phone Number, Contact Type, Last Contact Date, Notes
+- **Activities**: Next Action, Activity Type, Date, Contact (linked to Contacts), Property (linked to Properties), Status, Follow-up Required, Notes
 
-## Deploy on Vercel
+## Built With
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js](https://nextjs.org/) - The React Framework
+- [TypeScript](https://www.typescriptlang.org/) - TypeScript is a typed superset of JavaScript
+- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework
+- [Airtable](https://airtable.com/) - Flexible database and API
+- [Recharts](https://recharts.org/) - Chart library for React
