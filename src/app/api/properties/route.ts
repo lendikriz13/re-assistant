@@ -1,5 +1,21 @@
-// src/app/api/properties/route.ts
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
+
+interface Property {
+  id: string;
+  fields: {
+    Address: string;
+    'Asking Price'?: number;
+    'Property Type'?: string;
+    'ARV Estimate'?: number;
+    'Repair Estimate'?: number;
+    Notes?: string;
+    'Contact Name'?: string;
+    'Contact Email'?: string;
+    'Contact Phone'?: string;
+    'Contact Type'?: string;
+  };
+  createdTime: string;
+}
 
 export async function GET() {
   try {
@@ -14,10 +30,13 @@ export async function GET() {
       throw new Error('Failed to fetch properties')
     }
 
-    const data = await response.json()
-    return NextResponse.json(data)
+    const data: { records: Property[] } = await response.json();
+    return NextResponse.json(data.records)
   } catch (error) {
-    console.error('Error fetching properties:', error)
-    return NextResponse.json({ error: 'Failed to fetch properties' }, { status: 500 })
+    console.error('Error fetching properties:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch properties' },
+      { status: 500 }
+    )
   }
 }

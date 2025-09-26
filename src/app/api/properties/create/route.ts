@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the property
-    const propertyData: any = {
+    const propertyData: Record<string, unknown> = {
       Address: formData.address,
       'Property Type': formData.propertyType,
       'Deal Stage': formData.dealStage,
@@ -123,10 +123,11 @@ export async function POST(request: NextRequest) {
       message: 'Property created successfully'
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create property'
     console.error('Error creating property:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to create property' },
+      { error: errorMessage },
       { status: 500 }
     )
   }

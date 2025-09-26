@@ -1,0 +1,10 @@
+.next/
+node_modules/
+out/
+build/
+public/
+*.json
+*.md
+*.mdx
+*.css
+*.scss

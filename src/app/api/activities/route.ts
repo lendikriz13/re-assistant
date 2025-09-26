@@ -1,4 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
+
+interface Activity {
+  id: string;
+  fields: Record<string, any>;
+  createdTime: string;
+}
 
 export async function GET() {
   try {
@@ -13,10 +19,13 @@ export async function GET() {
       throw new Error('Failed to fetch activities')
     }
 
-    const data = await response.json()
-    return NextResponse.json(data)
+    const data: { records: Activity[] } = await response.json();
+    return NextResponse.json(data.records)
   } catch (error) {
-    console.error('Error fetching activities:', error)
-    return NextResponse.json({ error: 'Failed to fetch activities' }, { status: 500 })
+    console.error('Error fetching activities:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch activities' },
+      { status: 500 }
+    )
   }
 }

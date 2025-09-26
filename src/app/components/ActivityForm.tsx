@@ -119,7 +119,7 @@ export default function ActivityForm({ onSuccess }: { onSuccess?: () => void }) 
       } else {
         setSubmitResult({ success: false, message: result.error || 'Failed to create activity' })
       }
-    } catch (error) {
+    } catch {
       setSubmitResult({ success: false, message: 'Network error. Please try again.' })
     } finally {
       setIsSubmitting(false)
@@ -157,7 +157,7 @@ export default function ActivityForm({ onSuccess }: { onSuccess?: () => void }) 
                 name="activityType"
                 value={formData.activityType}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               >
                 <option value="Call">Call</option>
                 <option value="Email">Email</option>
@@ -187,7 +187,7 @@ export default function ActivityForm({ onSuccess }: { onSuccess?: () => void }) 
                 name="date"
                 value={formData.date}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               />
             </div>
 
@@ -198,7 +198,7 @@ export default function ActivityForm({ onSuccess }: { onSuccess?: () => void }) 
                 name="time"
                 value={formData.time}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               />
             </div>
           </div>
@@ -229,7 +229,7 @@ export default function ActivityForm({ onSuccess }: { onSuccess?: () => void }) 
                 name="contactId"
                 value={formData.contactId}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               >
                 <option value="">Select a contact</option>
                 {contacts.map((contact) => (
@@ -249,7 +249,7 @@ export default function ActivityForm({ onSuccess }: { onSuccess?: () => void }) 
                 name="propertyId"
                 value={formData.propertyId}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               >
                 <option value="">Select a property</option>
                 {properties.map((property) => (

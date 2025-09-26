@@ -1,3 +1,4 @@
+// src/app/api/activities/complete/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
@@ -44,8 +45,8 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred'
-    console.error('Error completing activity:', errorMessage)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to complete activity'
+    console.error('Error completing activity:', error)
     return NextResponse.json(
       { error: errorMessage },
       { status: 500 }

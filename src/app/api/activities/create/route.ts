@@ -9,20 +9,19 @@ interface ActivityFormData {
   followupRequired: boolean
   contactId: string
   propertyId: string
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData: ActivityFormData = await request.json()
 
-    // Define activity fields interface
-    interface ActivityFields {
-      'Next Action': string;
-      'Activity Type': string;
-      'Notes'?: string;
-      'Follow-up Required': boolean;
-      'Status': string;
-      'Date'?: string;
-      'Contact'?: string[];
-      'Property'?: string[];
+    // Prepare activity data
+    const activityData: Record<string, unknown> = {
+      'Next Action': formData.nextAction,
+      'Activity Type': formData.activityType,
+      Notes: formData.notes || undefined,
+      'Follow-up Required': formData.followupRequired,
+      Status: 'Open' // Default status for new activities
     }
 
     // Add date if provided
@@ -64,10 +63,11 @@ export async function POST(request: NextRequest) {
       message: 'Activity created successfully'
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create activity'
     console.error('Error creating activity:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to create activity' },
+      { error: errorMessage },
       { status: 500 }
     )
   }

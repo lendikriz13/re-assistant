@@ -1,7 +1,8 @@
+// src/app/components/DataEntry.tsx
 'use client'
 
 import { useState } from 'react'
-import { Upload, Plus, Building2, User, Calendar, AlertCircle, CheckCircle } from 'lucide-react'
+import { Upload, Plus, Building2, User, AlertCircle, CheckCircle } from 'lucide-react'
 
 type TabType = 'manual' | 'bulk'
 
@@ -27,6 +28,10 @@ interface BulkImportResult {
   errors: string[]
 }
 
+interface CsvRow {
+  [key: string]: string
+}
+
 export default function DataEntry() {
   const [activeTab, setActiveTab] = useState<TabType>('manual')
   const [formData, setFormData] = useState<PropertyFormData>({
@@ -43,7 +48,7 @@ export default function DataEntry() {
     contactType: 'Seller'
   })
   const [csvFile, setCsvFile] = useState<File | null>(null)
-  const [csvData, setCsvData] = useState<any[]>([])
+  const [csvData, setCsvData] = useState<CsvRow[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null)
   const [bulkResult, setBulkResult] = useState<BulkImportResult | null>(null)
@@ -91,7 +96,7 @@ export default function DataEntry() {
       } else {
         setSubmitResult({ success: false, message: result.error || 'Failed to create property' })
       }
-    } catch (error) {
+    } catch {
       setSubmitResult({ success: false, message: 'Network error. Please try again.' })
     } finally {
       setIsSubmitting(false)
@@ -120,7 +125,7 @@ export default function DataEntry() {
         .filter(line => line.trim())
         .map(line => {
           const values = line.split(',').map(v => v.trim())
-          const obj: any = {}
+          const obj: CsvRow = {}
           headers.forEach((header, index) => {
             obj[header] = values[index] || ''
           })
@@ -145,7 +150,7 @@ export default function DataEntry() {
 
       const result = await response.json()
       setBulkResult(result)
-    } catch (error) {
+    } catch {
       setBulkResult({
         success: false,
         total: csvData.length,
@@ -234,7 +239,7 @@ export default function DataEntry() {
                       name="propertyType"
                       value={formData.propertyType}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                     >
                       <option value="Single Family">Single Family</option>
                       <option value="Duplex">Duplex</option>
@@ -260,7 +265,7 @@ export default function DataEntry() {
                       name="dealStage"
                       value={formData.dealStage}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                     >
                       <option value="New Lead">New Lead</option>
                       <option value="Under Review">Under Review</option>
@@ -331,7 +336,7 @@ export default function DataEntry() {
                       name="contactType"
                       value={formData.contactType}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                     >
                       <option value="Seller">Seller</option>
                       <option value="Buyer">Buyer</option>
@@ -463,7 +468,7 @@ export default function DataEntry() {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {csvData.slice(0, 5).map((row, index) => (
                         <tr key={index}>
-                          {Object.values(row).map((value: any, i) => (
+                          {Object.values(row).map((value: string, i) => (
                             <td key={i} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {value}
                             </td>

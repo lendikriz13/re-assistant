@@ -1,4 +1,17 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
+
+interface Contact {
+  id: string;
+  fields: {
+    Name: string;
+    Email?: string;
+    Phone?: string;
+    Type?: string;
+    'Last Contacted'?: string;
+    Notes?: string;
+  };
+  createdTime: string;
+}
 
 export async function GET() {
   try {
@@ -13,10 +26,13 @@ export async function GET() {
       throw new Error('Failed to fetch contacts')
     }
 
-    const data = await response.json()
-    return NextResponse.json(data)
+    const data: { records: Contact[] } = await response.json();
+    return NextResponse.json(data.records)
   } catch (error) {
-    console.error('Error fetching contacts:', error)
-    return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 })
+    console.error('Error fetching contacts:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch contacts' },
+      { status: 500 }
+    )
   }
 }
